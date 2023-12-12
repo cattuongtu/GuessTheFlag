@@ -17,6 +17,12 @@ struct ContentView: View {
     @State private var score = 0
     @State private var questionCount = 0
     
+    // State to keep track of rotating icon
+    @State private var isRotated = [false, false, false]
+    
+    @State private var opacity = 1.0
+    @State private var scale = 1.0
+    
     var body: some View {
         ZStack {
             RadialGradient(stops: [
@@ -44,11 +50,21 @@ struct ContentView: View {
                     ForEach(0..<3) { number in
                         Button {
                             flagTapped(number)
+                            self.isRotated[number].toggle()
+                            withAnimation {
+                                opacity -= 0.75
+                                scale -= 0.5
+                            }
+                        
                         } label: {
                             Image(countries[number])
                                 .clipShape(.capsule)
                                 .shadow(radius: 5)
                         }
+                        .rotationEffect(Angle.degrees(isRotated[number] ? 360 : 0))
+                        .opacity(!isRotated[number] ? opacity : 1.0)
+                        .scaleEffect(!isRotated[number] ? scale : 1.0)
+                        .animation(_:.easeOut)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -97,6 +113,9 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        opacity = 1.0
+        scale = 1.0
+        isRotated = [false, false, false]
     }
     
     func reset() {
@@ -104,6 +123,9 @@ struct ContentView: View {
         questionCount = 0
         gameFinished = false
         showingScore = false
+        opacity = 1.0
+        scale = 1.0
+        isRotated = [false, false, false]
     }
 }
 
